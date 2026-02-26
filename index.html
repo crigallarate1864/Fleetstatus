@@ -4,223 +4,204 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Flotta // Live</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* Colori tecnologici base */
-            --bg-base: #030a16;
-            --neon-blue: #00f0ff;
-            --neon-red: #ff003c;
-            --text-main: #a9b8c2;
+            --bg-base: #0a0f18;
+            --neon-blue: #00e5ff;
+            --neon-red: #ff3366;
+            --text-main: #b4c5d6;
             --text-bright: #ffffff;
             
-            /* Sfondi Glassmorphism */
-            --glass-bg: rgba(10, 25, 47, 0.4);
-            --glass-border: rgba(0, 240, 255, 0.15);
-            --glass-highlight: rgba(255, 255, 255, 0.05);
+            --glass-bg: rgba(16, 25, 40, 0.6);
+            --glass-border: rgba(0, 229, 255, 0.15);
             
-            --font-title: 'Orbitron', sans-serif;
-            --font-body: 'Rajdhani', sans-serif;
+            --font-main: 'Inter', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
         }
 
+        /* Nascondi scrollbar per pulizia */
         ::-webkit-scrollbar {
             display: none;
         }
 
         body {
             background-color: var(--bg-base);
-            /* Effetto griglia tecnologica di sfondo */
+            /* Sfondo a griglia leggerissima */
             background-image: 
-                linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
-            background-size: 30px 30px;
+                linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            background-size: 40px 40px;
             color: var(--text-main);
-            font-family: var(--font-body);
+            font-family: var(--font-main);
             margin: 0;
-            padding: 2rem;
+            padding: 1.5rem; /* Margini ridotti */
             box-sizing: border-box;
-            -ms-overflow-style: none;  
-            scrollbar-width: none;  
+            height: 100vh; /* Forza l'altezza alla finestra del browser */
+            overflow: hidden; /* Blocca lo scroll manuale e automatico */
+            display: flex;
+            flex-direction: column;
         }
 
-        /* Intestazione Glass */
+        /* Intestazione ultra-compatta */
         header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             background: var(--glass-bg);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border: 1px solid var(--glass-border);
-            border-bottom: 2px solid var(--neon-blue);
-            padding: 1.5rem 2rem;
-            margin-bottom: 3rem;
-            border-radius: 12px;
-            position: sticky;
-            top: 20px;
-            z-index: 100;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+            padding: 0.8rem 1.5rem;
+            margin-bottom: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            flex-shrink: 0; /* Impedisce che l'header si rimpicciolisca */
         }
 
         h1 {
             color: var(--text-bright);
-            font-family: var(--font-title);
-            font-size: 2.2rem;
+            font-weight: 800;
+            font-size: 1.6rem;
             margin: 0;
-            letter-spacing: 3px;
+            letter-spacing: 1px;
             text-transform: uppercase;
-            text-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
         }
 
         .status-badge {
-            background: rgba(255, 0, 60, 0.1);
+            background: rgba(255, 51, 102, 0.1);
             color: var(--neon-red);
             border: 1px solid var(--neon-red);
-            padding: 0.5rem 1.2rem;
+            padding: 0.4rem 1rem;
             border-radius: 4px;
-            font-family: var(--font-title);
-            font-weight: 700;
-            font-size: 1rem;
-            letter-spacing: 2px;
+            font-weight: 800;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
             animation: pulse-red 2s infinite;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
 
         .dot {
-            height: 10px;
-            width: 10px;
+            height: 8px;
+            width: 8px;
             background-color: var(--neon-red);
             border-radius: 50%;
             display: inline-block;
-            box-shadow: 0 0 10px var(--neon-red);
+            box-shadow: 0 0 8px var(--neon-red);
         }
 
-        /* Griglia Dashboard */
+        /* Griglia dinamica per far stare tutto in una schermata */
         #dashboard-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
-            gap: 2.5rem;
+            /* Le colonne si adattano. Se ci sono troppe schede, si rimpiccioliscono */
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            /* Se superiamo lo spazio in altezza, la griglia proverà a schiacciare i gap */
+            gap: 1rem;
+            flex-grow: 1; /* Occupa tutto lo spazio rimanente sotto l'header */
+            align-content: start; /* Allinea in alto */
         }
 
-        /* Scheda Veicolo Principale - Effetto Glass */
+        /* Scheda Veicolo */
         .card {
             background: var(--glass-bg);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             border: 1px solid var(--glass-border);
-            border-top: 4px solid var(--neon-blue);
-            border-radius: 16px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+            border-top: 3px solid var(--neon-blue);
+            border-radius: 8px;
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            position: relative;
-        }
-
-        /* Bagliore interno scheda */
-        .card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0; height: 100px;
-            background: linear-gradient(180deg, rgba(0,240,255,0.05) 0%, transparent 100%);
-            pointer-events: none;
+            /* Altezza massima limitata per farcene stare di più */
+            max-height: calc(100vh - 120px); 
         }
 
         .card-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1.5rem;
-            border-bottom: 1px solid var(--glass-highlight);
+            padding: 0.8rem 1rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .sigla-radio {
-            font-family: var(--font-title);
-            font-size: 2.5rem;
-            font-weight: 700;
+            font-weight: 800;
+            font-size: 1.6rem;
             color: var(--text-bright);
-            letter-spacing: 2px;
-            text-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
         }
 
         .badge-count {
-            background-color: rgba(0, 240, 255, 0.1);
+            background-color: rgba(0, 229, 255, 0.1);
             color: var(--neon-blue);
             border: 1px solid var(--neon-blue);
-            padding: 0.3rem 0.8rem;
-            border-radius: 20px;
-            font-size: 1.1rem;
-            font-weight: 700;
-            box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
         }
 
-        /* Contenitore Segnalazioni */
+        /* Contenitore Segnalazioni (con scroll interno se troppe in una sola scheda) */
         .reports-container {
-            padding: 1.5rem;
+            padding: 0.8rem;
             display: flex;
             flex-direction: column;
-            gap: 1.2rem;
+            gap: 0.6rem;
+            overflow-y: auto; /* Se un singolo veicolo ha troppi danni, scrolla solo la sua scheda */
         }
 
-        /* Singola segnalazione */
+        /* Singola segnalazione compatta */
         .report-item {
-            background: rgba(0, 0, 0, 0.3);
+            background: rgba(0, 0, 0, 0.4);
             border: 1px solid rgba(255, 255, 255, 0.05);
-            padding: 1.2rem;
-            border-radius: 8px;
-            position: relative;
-            border-left: 3px solid #fff; /* Verrà sovrascritto via JS in base al difetto */
+            padding: 0.6rem 0.8rem;
+            border-radius: 6px;
+            border-left: 3px solid #fff; 
         }
 
         .report-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 0.8rem;
+            margin-bottom: 0.4rem;
         }
 
         .difetto-tipo {
-            font-family: var(--font-title);
+            font-family: var(--font-mono);
             display: inline-block;
             background: rgba(255, 255, 255, 0.1);
             color: #fff;
-            padding: 0.3rem 0.6rem;
-            border-radius: 4px;
-            font-size: 0.9rem;
-            font-weight: 700;
-            letter-spacing: 1px;
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-size: 0.75rem;
+            font-weight: 600;
             text-transform: uppercase;
         }
 
         .id-segnalazione {
-            font-family: var(--font-title);
-            font-size: 0.8rem;
-            color: rgba(255, 255, 255, 0.4);
-            letter-spacing: 1px;
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.3);
         }
 
         .difetto-descrizione {
-            font-size: 1.4rem;
-            line-height: 1.4;
+            font-size: 0.95rem;
+            line-height: 1.3;
             color: var(--text-bright);
-            margin-bottom: 1rem;
-            font-weight: 500;
-        }
-
-        .autista {
-            font-size: 1.1rem;
-            color: #778899;
-            text-align: right;
-            border-top: 1px dashed rgba(255, 255, 255, 0.1);
-            padding-top: 0.6rem;
+            font-weight: 400;
+            /* Trunca il testo se è troppo lungo per salvare spazio */
+            display: -webkit-box;
+            -webkit-line-clamp: 2; /* Mostra massimo 2 righe di descrizione */
+            -webkit-box-orient: vertical;  
+            overflow: hidden;
         }
 
         @keyframes pulse-red {
-            0% { box-shadow: 0 0 0 0 rgba(255, 0, 60, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(255, 0, 60, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(255, 0, 60, 0); }
+            0% { box-shadow: 0 0 0 0 rgba(255, 51, 102, 0.3); }
+            70% { box-shadow: 0 0 0 8px rgba(255, 51, 102, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 51, 102, 0); }
         }
     </style>
 </head>
@@ -238,17 +219,15 @@
         </div>
 
     <script>
-        // URL del file CSV
         const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT8wQ0jGLsUvO8VqP8SnyuLlar0zApUn1maRLMEWMFL2EFrv2LFcxGkLJ6X3vf4ilsDWPRAzHjcub-l/pub?output=csv';
 
-        // Funzione per mappare i colori tecnologici in base al tipo di difetto
         function getDefectStyle(tipo) {
             const t = tipo.toUpperCase();
-            if (t.includes('ELETTRICO')) return { color: '#ffea00', border: '#ffea00', bg: 'rgba(255, 234, 0, 0.1)' }; // Giallo Neon
-            if (t.includes('MECCANICO')) return { color: '#ff6600', border: '#ff6600', bg: 'rgba(255, 102, 0, 0.1)' }; // Arancio
-            if (t.includes('CARROZZERIA')) return { color: '#ff00aa', border: '#ff00aa', bg: 'rgba(255, 0, 170, 0.1)' }; // Fucsia Neon
-            if (t.includes('VETRI')) return { color: '#00f0ff', border: '#00f0ff', bg: 'rgba(0, 240, 255, 0.1)' }; // Ciano Neon
-            return { color: '#00ff66', border: '#00ff66', bg: 'rgba(0, 255, 102, 0.1)' }; // Verde Neon (Generale)
+            if (t.includes('ELETTRICO')) return { color: '#ffea00', border: '#ffea00', bg: 'rgba(255, 234, 0, 0.1)' }; 
+            if (t.includes('MECCANICO')) return { color: '#ff8c00', border: '#ff8c00', bg: 'rgba(255, 140, 0, 0.1)' }; 
+            if (t.includes('CARROZZERIA')) return { color: '#ff00aa', border: '#ff00aa', bg: 'rgba(255, 0, 170, 0.1)' }; 
+            if (t.includes('VETRI')) return { color: '#00e5ff', border: '#00e5ff', bg: 'rgba(0, 229, 255, 0.1)' }; 
+            return { color: '#00e676', border: '#00e676', bg: 'rgba(0, 230, 118, 0.1)' }; 
         }
 
         async function fetchDashboardData() {
@@ -268,30 +247,21 @@
 
             const vehicles = {};
 
-            // Mappatura esatta basata sulla tua lista:
-            // 0: ID nascosto
-            // 1: ID Segnalazione
-            // 2: Sigla Radio
-            // 3: Tipologia difetto
-            // 4: Descrizione difetto
-            // 5: Foto
-            // 6: Autista segnalatore
-
+            // Lettura colonne (0:ID Nascosto, 1:ID Segn, 2:Sigla, 3:Tipo, 4:Desc, 5:Foto, 6:Autista)
             for (let i = 1; i < lines.length; i++) {
                 const columns = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
 
-                if (columns.length >= 7) {
+                if (columns.length >= 5) { // Ci bastano le prime 5 colonne ora
                     const idSegnalazione = columns[1] ? columns[1].trim().replace(/"/g, '') : 'N/A';
                     const sigla = columns[2] ? columns[2].trim().replace(/"/g, '') : 'SCONOSCIUTA';
                     const tipo = columns[3] ? columns[3].trim().replace(/"/g, '') : 'GEN';
                     const desc = columns[4] ? columns[4].trim().replace(/"/g, '') : 'Nessun dettaglio';
-                    const autista = columns[6] ? columns[6].trim().replace(/"/g, '') : 'Ignoto';
 
                     if (!vehicles[sigla]) {
                         vehicles[sigla] = [];
                     }
                     
-                    vehicles[sigla].push({ id: idSegnalazione, tipo, desc, autista });
+                    vehicles[sigla].push({ id: idSegnalazione, tipo, desc });
                 }
             }
 
@@ -302,19 +272,17 @@
                 
                 let reportsHTML = '';
                 reports.forEach(report => {
-                    // Ottiene lo stile neon basato sulla tipologia
                     const style = getDefectStyle(report.tipo);
 
                     reportsHTML += `
                         <div class="report-item" style="border-left-color: ${style.border};">
                             <div class="report-header">
-                                <span class="difetto-tipo" style="color: ${style.color}; background: ${style.bg}; box-shadow: 0 0 10px ${style.bg};">
+                                <span class="difetto-tipo" style="color: ${style.color}; background: ${style.bg};">
                                     ${report.tipo}
                                 </span>
-                                <span class="id-segnalazione">ID: ${report.id}</span>
+                                <span class="id-segnalazione">${report.id}</span>
                             </div>
-                            <div class="difetto-descrizione">${report.desc}</div>
-                            <div class="autista">OPERATORE: ${report.autista}</div>
+                            <div class="difetto-descrizione" title="${report.desc}">${report.desc}</div>
                         </div>
                     `;
                 });
@@ -324,7 +292,7 @@
                 card.innerHTML = `
                     <div class="card-header">
                         <span class="sigla-radio">${sigla}</span>
-                        <span class="badge-count">${reports.length} REC</span>
+                        <span class="badge-count">${reports.length}</span>
                     </div>
                     <div class="reports-container">
                         ${reportsHTML}
@@ -334,28 +302,13 @@
             });
         }
 
-        // Avvio e aggiornamento
+        // Avvio iniziale e aggiornamento in background ogni 60 secondi
         fetchDashboardData();
         setInterval(fetchDashboardData, 60000);
 
-        // Auto-Scroll Fluido
-        let scrollSpeed = 1; 
-        let delay = 35; 
-        let isPaused = false;
+        // Nessuno scroll automatico della pagina. 
+        // L'altezza è fissa (100vh) per tenere tutto nella TV.
 
-        setInterval(() => {
-            if(!isPaused) {
-                if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 5) {
-                    isPaused = true;
-                    setTimeout(() => {
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                        setTimeout(() => isPaused = false, 1000);
-                    }, 4000);
-                } else {
-                    window.scrollBy(0, scrollSpeed);
-                }
-            }
-        }, delay);
     </script>
 </body>
 </html>
