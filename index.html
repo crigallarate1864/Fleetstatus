@@ -3,20 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Danni Flotta</title>
+    <title>Dashboard Segnalazioni Veicoli</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-color: #0b0c10;
             --card-bg: #1f2833;
-            --accent-red: #ed2939; /* Rosso Croce Rossa */
+            --card-inner-bg: #151b22;
+            --accent-red: #ed2939; 
             --text-main: #c5c6c7;
             --text-bright: #ffffff;
             --font-main: 'Inter', sans-serif;
             --font-mono: 'JetBrains Mono', monospace;
         }
 
-        /* Nascondo la barra di scorrimento per un look più pulito sulla TV */
         ::-webkit-scrollbar {
             display: none;
         }
@@ -28,8 +28,8 @@
             margin: 0;
             padding: 2rem;
             box-sizing: border-box;
-            -ms-overflow-style: none;  /* IE and Edge */
-            scrollbar-width: none;  /* Firefox */
+            -ms-overflow-style: none;  
+            scrollbar-width: none;  
         }
 
         /* Intestazione */
@@ -68,7 +68,6 @@
             gap: 10px;
         }
 
-        /* Pallino lampeggiante */
         .dot {
             height: 12px;
             width: 12px;
@@ -80,70 +79,99 @@
         /* Griglia Dashboard */
         #dashboard-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
             gap: 2rem;
         }
 
-        /* Schede Veicoli */
+        /* Scheda Veicolo Principale */
         .card {
             background-color: var(--card-bg);
-            border-left: 5px solid var(--accent-red);
-            padding: 1.5rem;
-            border-radius: 4px;
+            border-top: 5px solid var(--accent-red);
+            border-radius: 6px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             display: flex;
             flex-direction: column;
-            gap: 1rem;
-            transition: transform 0.3s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
+            overflow: hidden;
         }
 
         .card-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            padding: 1.5rem;
+            background-color: rgba(0, 0, 0, 0.2);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
         }
 
         .sigla-radio {
-            font-size: 2.8rem;
+            font-size: 2.5rem;
             font-weight: 700;
             color: var(--text-bright);
+            letter-spacing: 1px;
         }
 
-        .id-segnalazione {
-            font-family: var(--font-mono);
-            font-size: 1.1rem;
-            color: #66fcf1;
+        .badge-count {
+            background-color: var(--accent-red);
+            color: white;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
+        /* Contenitore dei singoli difetti per quel veicolo */
+        .reports-container {
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        /* Singola segnalazione */
+        .report-item {
+            background-color: var(--card-inner-bg);
+            padding: 1.2rem;
+            border-radius: 4px;
+            border-left: 3px solid #45a29e; /* Colore tecnico di contrasto */
+        }
+
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.8rem;
         }
 
         .difetto-tipo {
             display: inline-block;
-            background: #2b3a4a;
-            padding: 0.4rem 1rem;
+            background: rgba(69, 162, 158, 0.15);
+            color: #66fcf1;
+            padding: 0.3rem 0.6rem;
             border-radius: 3px;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text-bright);
+        }
+
+        .id-segnalazione {
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            color: #888;
         }
 
         .difetto-descrizione {
-            font-size: 1.4rem;
-            line-height: 1.5;
-            flex-grow: 1;
+            font-size: 1.2rem;
+            line-height: 1.4;
             color: #e0e0e0;
+            margin-bottom: 0.8rem;
         }
 
         .autista {
-            font-size: 1.1rem;
-            color: #888;
+            font-size: 1rem;
+            color: #666;
             text-align: right;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            padding-top: 1rem;
+            border-top: 1px dashed rgba(255,255,255,0.1);
+            padding-top: 0.5rem;
             font-style: italic;
         }
 
@@ -157,7 +185,7 @@
 <body>
 
     <header>
-        <h1>DASHBOARD SEGNALAZIONI VEICOLI</h1>
+        <h1>Dashboard Segnalazioni Veicoli</h1>
         <div class="status-badge">
             <span class="dot"></span>
             LIVE SYNC
@@ -168,13 +196,10 @@
         </div>
 
     <script>
-        // Il tuo link ufficiale a Google Sheets
         const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT8wQ0jGLsUvO8VqP8SnyuLlar0zApUn1maRLMEWMFL2EFrv2LFcxGkLJ6X3vf4ilsDWPRAzHjcub-l/pub?output=csv';
 
-        // Funzione per scaricare i dati
         async function fetchDashboardData() {
             try {
-                // Aggiungiamo un parametro casuale per forzare il browser a non usare la cache e scaricare i dati freschi
                 const response = await fetch(csvUrl + '&t=' + new Date().getTime());
                 const csvText = await response.text();
                 processCSV(csvText);
@@ -183,65 +208,86 @@
             }
         }
 
-        // Funzione per tradurre il CSV in schede grafiche
         function processCSV(csvText) {
             const lines = csvText.split('\n').filter(line => line.trim() !== '');
             const grid = document.getElementById('dashboard-grid');
-            grid.innerHTML = ''; // Svuota la griglia prima di aggiornare
+            grid.innerHTML = ''; 
 
-            // Salta l'intestazione (i = 1)
+            // Oggetto per raggruppare i veicoli
+            const vehicles = {};
+
             for (let i = 1; i < lines.length; i++) {
-                // Questa formula divide le colonne in modo intelligente (ignora le virgole dentro le descrizioni)
                 const columns = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
 
                 if (columns.length >= 4) {
-                    // Mappatura colonne
-                    // 0: ID, 1: Sigla Radio, 2: Tipo difetto, 3: Descrizione, 4: Foto, 5: Autista
                     const id = columns[0] ? columns[0].trim().replace(/"/g, '') : 'N/A';
                     const sigla = columns[1] ? columns[1].trim().replace(/"/g, '') : 'SCONOSCIUTA';
                     const tipo = columns[2] ? columns[2].trim().replace(/"/g, '') : '-';
                     const desc = columns[3] ? columns[3].trim().replace(/"/g, '') : 'Nessun dettaglio';
+                    // Ignoriamo la colonna 4 (Foto)
                     const autista = columns[5] ? columns[5].trim().replace(/"/g, '') : 'Non specificato';
 
-                    const card = document.createElement('div');
-                    card.className = 'card';
-                    card.innerHTML = `
-                        <div class="card-header">
-                            <span class="sigla-radio">${sigla}</span>
-                            <span class="id-segnalazione">${id}</span>
-                        </div>
-                        <div>
-                            <span class="difetto-tipo">${tipo}</span>
-                        </div>
-                        <div class="difetto-descrizione">
-                            ${desc}
-                        </div>
-                        <div class="autista">
-                            Segnalato da: ${autista}
-                        </div>
-                    `;
-                    grid.appendChild(card);
+                    // Se il veicolo non esiste ancora nell'oggetto, lo creiamo
+                    if (!vehicles[sigla]) {
+                        vehicles[sigla] = [];
+                    }
+                    
+                    // Aggiungiamo la segnalazione alla lista di quel veicolo
+                    vehicles[sigla].push({ id, tipo, desc, autista });
                 }
             }
+
+            // Ordiniamo i veicoli alfabeticamente per Sigla Radio
+            const sortedSigle = Object.keys(vehicles).sort();
+
+            // Creiamo la grafica per ogni veicolo
+            sortedSigle.forEach(sigla => {
+                const reports = vehicles[sigla];
+                
+                // Creiamo le schede interne per i vari difetti
+                let reportsHTML = '';
+                reports.forEach(report => {
+                    reportsHTML += `
+                        <div class="report-item">
+                            <div class="report-header">
+                                <span class="difetto-tipo">${report.tipo}</span>
+                                <span class="id-segnalazione">${report.id}</span>
+                            </div>
+                            <div class="difetto-descrizione">${report.desc}</div>
+                            <div class="autista">Autista: ${report.autista}</div>
+                        </div>
+                    `;
+                });
+
+                // Creiamo la scheda del veicolo
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <div class="card-header">
+                        <span class="sigla-radio">${sigla}</span>
+                        <span class="badge-count">${reports.length} Segnalazion${reports.length > 1 ? 'i' : 'e'}</span>
+                    </div>
+                    <div class="reports-container">
+                        ${reportsHTML}
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
         }
 
-        // 1. Carica i dati appena apri la pagina
+        // Avvio iniziale e aggiornamento ogni minuto
         fetchDashboardData();
-
-        // 2. Aggiorna i dati in automatico ogni 60 secondi (60000 millisecondi)
         setInterval(fetchDashboardData, 60000);
 
-        // 3. Sistema di Auto-Scroll cinematografico per la TV
-        let scrollSpeed = 1; // Velocità di scorrimento
-        let delay = 30; // Fluidità (millisecondi)
+        // Sistema di Auto-Scroll
+        let scrollSpeed = 1; 
+        let delay = 30; 
         let isPaused = false;
 
         setInterval(() => {
             if(!isPaused) {
-                // Se siamo arrivati in fondo alla pagina
                 if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 5) {
                     isPaused = true;
-                    // Aspetta 3 secondi in fondo, poi torna su di scatto e ricomincia
                     setTimeout(() => {
                         window.scrollTo(0, 0);
                         isPaused = false;
