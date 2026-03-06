@@ -3,113 +3,279 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DASHBOARD Danni Autoparco CRI Gallarate</title>
+    <title>HUB Tecnologico Autoparco CRI Gallarate</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
     <style>
         :root {
-            --cri-red: #d64545;
-            --bg-dark: #0f172a;
-            --card-bg: #ffffff;
+            --bg-deep: #050a14;
+            --bg-card: #0a1120;
+            --cri-red-neon: #ff4d4d;
+            --cri-red-dim: #b33636;
+            --tech-cyan: #00ffff;
+            --text-main: #e0f2fe;
+            --text-dim: #94a3b8;
+            --border-color: rgba(0, 255, 255, 0.15);
+        }
+
+        @keyframes scanline {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100%); }
+        }
+
+        @keyframes flicker {
+            0% { opacity: 0.8; }
+            5% { opacity: 1; }
+            10% { opacity: 0.9; }
+            15% { opacity: 1; }
+            20% { opacity: 0.8; }
+            100% { opacity: 1; }
+        }
+
+        @keyframes pulse-cyan {
+            0% { box-shadow: 0 0 5px rgba(0, 255, 255, 0.3); }
+            50% { box-shadow: 0 0 15px rgba(0, 255, 255, 0.6); }
+            100% { box-shadow: 0 0 5px rgba(0, 255, 255, 0.3); }
+        }
+
+        @keyframes radar-beam {
+            0% { transform: rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: rotate(360deg); opacity: 0; }
         }
 
         body {
-            font-family: 'Segoe UI', Roboto, sans-serif;
-            background-color: #f1f5f9;
+            font-family: 'Inter', 'Segoe UI', Roboto, sans-serif; /* Font pulito e moderno */
+            background-color: var(--bg-deep);
+            color: var(--text-main);
             margin: 0;
             padding: 20px;
-            color: #1e293b;
             overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            animation: flicker 0.5s ease-out; /* Effetto accensione */
+        }
+
+        /* Overlay per le linee di scansione sottili */
+        body::after {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+            background-size: 100% 4px;
+            z-index: 1000;
+            pointer-events: none;
+            opacity: 0.3;
         }
 
         header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: var(--cri-red);
-            color: white;
-            padding: 20px 40px;
-            border-radius: 15px;
-            margin-bottom: 30px;
-            box-shadow: 0 10px 25px rgba(214, 69, 69, 0.2);
+            background: var(--bg-card);
+            padding: 15px 40px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
         }
 
-        h1 { margin: 0; font-size: 2.5rem; }
-        .stats { font-size: 1.5rem; font-weight: bold; }
+        header::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--tech-cyan), transparent);
+        }
 
-        /* GRIGLIA PRINCIPALE */
+        .header-title-group h1 {
+            margin: 0;
+            font-size: 2.2rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            background: linear-gradient(180deg, #fff, var(--text-dim));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .status-bar {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .status-item {
+            font-size: 1rem;
+            color: var(--text-dim);
+            padding: 5px 10px;
+            border: 1px solid transparent;
+        }
+
+        .status-item.active {
+            border-color: var(--tech-cyan);
+            border-radius: 4px;
+            animation: pulse-cyan 2s infinite;
+        }
+
+        .time-display {
+            font-family: 'Courier New', monospace;
+            color: var(--tech-cyan);
+            font-weight: bold;
+        }
+
+        /* AREA QR CODE NELL'HEADER */
+        .qr-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            position: relative;
+        }
+
+        /* Animazione radar sul QR */
+        .qr-container::after {
+            content: "";
+            position: absolute;
+            top: 5px; left: 5px; width: 60px; height: 60px;
+            border-radius: 50%;
+            border-top: 2px solid var(--tech-cyan);
+            animation: radar-beam 4s linear infinite;
+            pointer-events: none;
+        }
+
+        #qrcode {
+            width: 60px;
+            height: 60px;
+            background: white; /* Sfondo bianco per massima scansionabilità */
+            padding: 5px;
+            border-radius: 4px;
+        }
+
+        .qr-label {
+            font-size: 0.9rem;
+            color: var(--text-main);
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+
+        /* GRIGLIA PRINCIPALE DUSPLAY 48" */
         #listaDifetti {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-            gap: 25px;
+            grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+            gap: 20px;
+            flex-grow: 1;
+            overflow-y: auto;
+            padding-right: 10px;
         }
 
+        /* Scrollbar personalizzata stile tech */
+        #listaDifetti::-webkit-scrollbar { width: 8px; }
+        #listaDifetti::-webkit-scrollbar-track { background: var(--bg-deep); }
+        #listaDifetti::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+        #listaDifetti::-webkit-scrollbar-thumb:hover { background: var(--tech-cyan); }
+
         .veicolo-group {
-            background: var(--card-bg);
-            border-radius: 20px;
-            border-top: 8px solid var(--cri-red);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            background: var(--bg-card);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
             display: flex;
             flex-direction: column;
-            padding: 20px;
+            position: relative;
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+
+        .veicolo-group:hover {
+            border-color: rgba(0, 255, 255, 0.5);
+            transform: translateY(-3px);
+        }
+
+        /* Angolo smussato tech in alto a destra */
+        .veicolo-group::before {
+            content: "";
+            position: absolute;
+            top: -1px; right: -1px;
+            border-style: solid;
+            border-width: 0 16px 16px 0;
+            border-color: transparent var(--tech-cyan) transparent transparent;
         }
 
         .veicolo-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 2px solid #f1f5f9;
-            padding-bottom: 15px;
-            margin-bottom: 15px;
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(0, 255, 255, 0.03);
         }
 
         .veicolo-sigla {
-            font-size: 2rem;
+            font-size: 1.8rem;
             font-weight: 900;
-            color: #0f172a;
+            color: white;
+            letter-spacing: -0.5px;
         }
 
         .badge-conteggio {
-            background: #f8fafc;
-            color: var(--cri-red);
-            border: 2px solid var(--cri-red);
-            padding: 5px 15px;
-            border-radius: 50px;
-            font-size: 1.2rem;
+            background: var(--cri-red-dim);
+            color: white;
+            padding: 2px 12px;
+            border-radius: 4px;
+            font-size: 1rem;
             font-weight: bold;
+            font-family: monospace;
+            border: 1px solid var(--cri-red-neon);
+        }
+
+        .difetti-lista {
+            padding: 15px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
 
         /* CARD SINGOLO DIFETTO */
         .difetto-card {
-            background: #f8fafc;
-            border-left: 5px solid #cbd5e1;
-            padding: 15px;
-            margin-bottom: 12px;
-            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 12px;
+            border-radius: 4px;
+            position: relative;
         }
 
-        .tipologia-badge {
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            font-weight: bold;
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 6px;
+        .difetto-header {
+            display: flex;
+            justify-content: space-between;
             margin-bottom: 8px;
         }
 
-        .descrizione {
-            font-size: 1.1rem;
-            line-height: 1.4;
-            color: #334155;
+        .tipologia-badge {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            font-weight: 800;
+            color: var(--cri-red-neon);
+            letter-spacing: 0.5px;
         }
 
         .data-segnalazione {
-            display: block;
-            font-size: 0.85rem;
-            color: #94a3b8;
-            margin-top: 8px;
-            text-align: right;
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            font-family: monospace;
+        }
+
+        .descrizione {
+            font-size: 1.05rem;
+            line-height: 1.4;
+            color: var(--text-main);
         }
 
         /* MESSAGGIO TUTTO OK */
@@ -117,44 +283,83 @@
             grid-column: 1 / -1;
             text-align: center;
             padding: 100px;
-            background: white;
-            border-radius: 30px;
-            font-size: 3rem;
-            color: #10b981;
+            color: var(--tech-cyan);
+            font-size: 2.5rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: bold;
+            border: 2px dashed var(--tech-cyan);
+            border-radius: 8px;
+            background: rgba(0, 255, 255, 0.05);
         }
 
         .loading {
-            font-size: 2rem;
+            font-size: 1.8rem;
             text-align: center;
             width: 100%;
             margin-top: 100px;
+            color: var(--text-dim);
+            text-transform: uppercase;
         }
     </style>
 </head>
 <body>
 
     <header>
-        <div>
-            <h1>🚛 Stato Danni Autoparco</h1>
-            <div id="last-update" style="opacity: 0.8;">Caricamento...</div>
+        <div class="header-title-group">
+            <h1>UNIT&Agrave; MONITORAGGIO DANNI AUTOPARCO</h1>
+            <div class="status-bar">
+                <div class="status-item active">SISTEMA ATTIVO</div>
+                <div class="status-item">REFRESH: 5 MIN</div>
+                <div class="status-item time-display" id="clock">--:--:--</div>
+            </div>
         </div>
-        <div class="stats" id="stats-summary">Mezzi con danni: --</div>
+        
+        <div class="qr-container">
+            <div id="qrcode"></div> <div class="qr-label">Pannello<br>Segnalazioni<br>Mobile</div>
+        </div>
     </header>
 
     <div id="listaDifetti">
-        <div class="loading">Sincronizzazione database in corso... ⏳</div>
+        <div class="loading">Inizializzazione scansione database... ⏳</div>
     </div>
 
     <script>
         const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT8wQ0jGLsUvO8VqP8SnyuLlar0zApUn1maRLMEWMFL2EFrv2LFcxGkLJ6X3vf4ilsDWPRAzHjcub-l/pub?output=csv';
-        
+        // URL dell'app o della webapp (inserisci qui l'URL reale)
+        const appUrl = 'https://forms.gle/oBhFEMTXRkrYGaBD9'; 
+
+        // 1. Generazione QR Code
+        new QRCode(document.getElementById("qrcode"), {
+            text: appUrl,
+            width: 60,
+            height: 60,
+            colorDark : "#000000",
+            colorLight : "#ffffff",
+            correctLevel : QRCode.CorrectLevel.H // Alta correzione errore
+        });
+
+        // 2. Orologio di sistema
+        function updateClock() {
+            const now = new Date();
+            const timeStr = now.getHours().toString().padStart(2, '0') + ':' +
+                            now.getMinutes().toString().padStart(2, '0') + ':' +
+                            now.getSeconds().toString().padStart(2, '0');
+            document.getElementById('clock').textContent = timeStr;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // 3. Logica Dati
         function caricaDati() {
             Papa.parse(csvUrl, {
                 download: true,
                 header: true,
                 complete: function(results) {
                     processaDati(results.data);
-                    document.getElementById('last-update').textContent = "Ultimo aggiornamento: " + new Date().toLocaleTimeString();
+                },
+                error: function() {
+                     document.getElementById('listaDifetti').innerHTML = '<div class="loading" style="color:var(--cri-red-neon)">ERRORE SINCRO DATABASE</div>';
                 }
             });
         }
@@ -163,15 +368,16 @@
             const listaDiv = document.getElementById('listaDifetti');
             listaDiv.innerHTML = '';
 
+            // Filtro e pulizia dati (reverse per avere i più recenti in alto)
             const difettiAttivi = dati.filter(riga => {
                 const haSigla = riga['Sigla radio'] && riga['Sigla radio'].trim() !== '';
+                // Cerca "risolto" in qualsiasi colonna (case insensitive)
                 const eRisolto = Object.values(riga).some(val => typeof val === 'string' && val.trim().toLowerCase() === 'risolto');
                 return haSigla && !eRisolto;
-            });
+            }).reverse();
 
             if (difettiAttivi.length === 0) {
-                listaDiv.innerHTML = '<div class="tutto-ok">✅ Tutti i mezzi sono operativi</div>';
-                document.getElementById('stats-summary').textContent = "Mezzi con danni: 0";
+                listaDiv.innerHTML = '<div class="tutto-ok">>> NESSUNA ANOMALIA RILEVATA <<</div>';
                 return;
             }
 
@@ -184,7 +390,6 @@
             });
 
             const sigle = Object.keys(raggruppati).sort();
-            document.getElementById('stats-summary').textContent = `Mezzi con danni: ${sigle.length}`;
 
             sigle.forEach(sigla => {
                 const mezzoDiv = document.createElement('div');
@@ -193,21 +398,25 @@
                 let htmlDifetti = '';
                 raggruppati[sigla].forEach(difetto => {
                     const tipo = difetto['Tipologia Difetto'] || 'Generico';
-                    
-                    // Estraggo i testi dei vari campi come nel tuo codice originale
+                    const dataFull = difetto['Informazioni cronologiche'] || '';
+                    const dataCorta = dataFull.split(' ')[0]; // Prende solo la data, non l'ora
+
+                    // Raccolta dettagli
                     let dettagli = [];
-                    if (difetto['Difetto motore e meccanica ⚙️']) dettagli.push(difetto['Difetto motore e meccanica ⚙️']);
-                    if (difetto['Elettrico e Dispositivi di Emergenza 🚑']) dettagli.push(difetto['Elettrico e Dispositivi di Emergenza 🚑']);
-                    if (difetto['Carrozzeria e vetri']) dettagli.push(difetto['Carrozzeria e vetri']);
-                    if (difetto['Vano Sanitario e Interni']) dettagli.push(difetto['Vano Sanitario e Interni']);
+                    if (difetto['Difetto motore e meccanica ⚙️']) dettagli.push('⚙️ ' + difetto['Difetto motore e meccanica ⚙️']);
+                    if (difetto['Elettrico e Dispositivi di Emergenza 🚑']) dettagli.push('🚑 ' + difetto['Elettrico e Dispositivi di Emergenza 🚑']);
+                    if (difetto['Carrozzeria e vetri']) dettagli.push('🚙 ' + difetto['Carrozzeria e vetri']);
+                    if (difetto['Vano Sanitario e Interni']) dettagli.push('🩺 ' + difetto['Vano Sanitario e Interni']);
                     
-                    const descrizioneText = dettagli.join(' | ') || difetto['Descrizione difetto'] || 'Dettaglio non specificato';
+                    let descrizioneText = dettagli.join('<br>') || difetto['Descrizione difetto'] || 'Dettaglio non specificato';
 
                     htmlDifetti += `
                         <div class="difetto-card">
-                            <span class="tipologia-badge" style="background:#fee2e2; color:#b91c1c">${tipo}</span>
+                            <div class="difetto-header">
+                                <span class="tipologia-badge">${tipo}</span>
+                                <span class="data-segnalazione">${dataCorta}</span>
+                            </div>
                             <div class="descrizione">${descrizioneText}</div>
-                            <span class="data-segnalazione">📅 ${difetto['Informazioni cronologiche'] || ''}</span>
                         </div>
                     `;
                 });
@@ -215,7 +424,7 @@
                 mezzoDiv.innerHTML = `
                     <div class="veicolo-header">
                         <span class="veicolo-sigla">🚐 ${sigla}</span>
-                        <span class="badge-conteggio">${raggruppati[sigla].length}</span>
+                        <span class="badge-conteggio">ANOMALIE: ${raggruppati[sigla].length}</span>
                     </div>
                     <div class="difetti-lista">
                         ${htmlDifetti}
@@ -225,7 +434,7 @@
             });
         }
 
-        // Avvio e Refresh automatico ogni 5 minuti (300000 ms)
+        // Avvio e Refresh automatico (5 min)
         caricaDati();
         setInterval(caricaDati, 300000);
     </script>
